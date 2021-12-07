@@ -1,36 +1,37 @@
 #include "Spravce_souboru2.h"
 
 using namespace std;
-HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);	// prace s konzoli
 
 // deklarace globalnich promennych
 char directoryPrint[40][200];
 int directoryFileCount[2];
 
-void GetFilePath(char directory[], char fileName[], char* outStr)
+void GetFilePath(char directory[], char fileName[], char* outStr)	// zapise cestu k souboru do outStr
 {
 	char filePath[256];
 
-	memcpy(filePath, directory, strlen(directory) + 1);
-	strncat(filePath, "\\", 2);
-	strncat(filePath, fileName, strlen(fileName) + 1);
+	memcpy(filePath, directory, strlen(directory) + 1);		// prekopiruje pamet do filePath z directory o delce strnlen(directory) + 1
+	strncat(filePath, "\\", 2);								// na konec texu prida 2 lomitka
+	strncat(filePath, fileName, strlen(fileName) + 1);		// na konec textu prida fileName
 	
-	memcpy(outStr, filePath, 256);
+	memcpy(outStr, filePath, 256);							// prekopiruje pamet do osuStr z filePath
 
 }
 
-void FileSize(char path[], char* outStr)
+void FileSize(char path[], char* outStr)					// zapise velikost souboru do outStr
 	{
-	string s(path);
-	struct stat stat_buf;
-	int rc = stat(s.c_str(), &stat_buf);
-	float sizef = stat_buf.st_size;
-	string size = to_string(sizef / 1000);
-	const char* fileSize = size.c_str();
-	memcpy(outStr, fileSize, 256);
+	string s(path);								// deklarace stringu s (naplni se path)
+	struct stat stat_buf;						// struktura z knihovny stat.h
+	int rc = stat(s.c_str(), &stat_buf);		// ziska vlastnosti souboru
+	float sizef = stat_buf.st_size;				// ziska velikost souboru v bajtech
+	string size = to_string(sizef / 1000);		// prekonvertuje cislo na text + vydeli cislo 1000 (kb)
+	const char* fileSize = size.c_str();		// udela ze stringu size pole fileSize
+	memcpy(outStr, fileSize, 256);				
 }
 
-void ClearPrintArray()
+void ClearPrintArray()							// vymaze obsah directoryPrint
 {
 	for (int i = 0; i < 40; i++)
 	{
@@ -41,20 +42,22 @@ void ClearPrintArray()
 void PrintDirectory()	// tiskne obsah slozek
 {
 	ClearPrintArray();
+
 	directoryFileCount[0] = 0;
 	directoryFileCount[1] = 0;
 
-	struct dirent* file;
-	DIR* dir1 = opendir(directory1);
-	int radek = 0;
+	struct dirent* file;				// struktura z dirent.h, po naplneni obsahuje parametry souboru
+	DIR* dir1 = opendir(directory1);	// otevre slozku directory1
+
+	int radek = 0;						
 	char filePath[256];
 	char fileSize[256];
 
-	if (dir1 != NULL)
+	if (dir1 != NULL)		// kontroluje slozku 1
 	{
 		while ((file = readdir(dir1)) != NULL)
 		{
-			memcpy(directoryPrint[radek], file->d_name, strlen(file->d_name) + 1);
+			memcpy(directoryPrint[radek], file->d_name, strlen(file->d_name) + 1);	
 			GetFilePath(directory1, file->d_name, filePath);
 			FileSize(filePath, fileSize);
 
@@ -99,7 +102,7 @@ void PrintDirectory()	// tiskne obsah slozek
 				directoryPrint[radek][101] = '\0';
 			}
 
-			strncat(directoryPrint[radek], file->d_name, strlen(file->d_name));
+			strncat(directoryPrint[radek], file->d_name, strlen(file->d_name));		// pripise na konec textu file->d_name, konec pozna podle \0
 
 			GetFilePath(directory2, file->d_name, filePath);
 			FileSize(filePath, fileSize);
@@ -124,30 +127,30 @@ void PrintDirectory()	// tiskne obsah slozek
 	closedir(dir2);
 	directoryFileCount[1] = radek;
 
-	for  (int i = 2; i < 40; i++)
+	for  (int i = 2; i < 40; i++)		// vypisuje soubory od radku 2
 	{
-		if (cursorPosition[1] == i)
+		if (cursorPosition[1] == i)		// kontroluje, jestli radek kurzoru odpovida radku tisku
 		{
-			if (cursorPosition[0] == 0)
+			if (cursorPosition[0] == 0)		// kontroluje okno kurzoru
 			{
-				SetConsoleTextAttribute(hConsole, 12);
+				SetConsoleTextAttribute(hConsole, 12);		// meni barvu textu na cervenou
 
 				for (int j = 0; j < 100; j++)
 				{
 					cout << directoryPrint[i][j];
 				}
 
-				SetConsoleTextAttribute(hConsole, 15);
+				SetConsoleTextAttribute(hConsole, 15);		// vrati se na bilou barvu
 
 				for (int k = 100; k < 200; k++)
 				{
 					cout << directoryPrint[i][k];
 				}
 
-				cout << endl;
+				cout << endl;		// ukonci radek
 			}
 
-			if (cursorPosition[0] == 1)
+			if (cursorPosition[0] == 1)		// to same pro druhe okno
 			{
 				for (int j = 0; j < 100; j++)
 				{
@@ -168,12 +171,12 @@ void PrintDirectory()	// tiskne obsah slozek
 		}
 		else
 		{
-			cout << directoryPrint[i] << endl;
+			cout << directoryPrint[i] << endl;		// vypise cely radek
 		}
 	}
 }
 
-void PrintTop()
+void PrintTop()		// vypise hlavicku
 {
 	char top[200];
 	char dots[4] = { '.', '.', '.', '\0'};
@@ -185,7 +188,7 @@ void PrintTop()
 	}
 	cout << endl;
 	
-	if (strlen(directory1) > 80)
+	if (strlen(directory1) > 80)		// kontroluje delku cesty
 	{
 		memcpy(top, dots, 3);
 
@@ -236,10 +239,11 @@ void PrintTop()
 	cout << endl;
 }
 
-void GoBack(char *outStr)
+void GoBack(char *outStr)		// vrati se o slozku zpet
 {
 	int stringLength = strlen(outStr);
 	int slashPosition = strlen(outStr);
+
 	while (outStr[slashPosition] != '\\')
 	{
 		slashPosition--;
@@ -252,7 +256,7 @@ void GoBack(char *outStr)
 
 }
 
-void OpenDirectory(char* outStr)
+void OpenDirectory(char* outStr)		// otevre slozku na ktere je kruzor
 {
 	DIR* directory = opendir(outStr);
 	struct dirent* file;
@@ -262,7 +266,7 @@ void OpenDirectory(char* outStr)
 		file = readdir(directory);
 	}
 
-	if (file->d_type == DT_DIR)
+	if (file->d_type == DT_DIR)				// zkontroluje jestli vybrany soubor je slozka	
 	{
 		strcat(outStr, "\\");
 		strcat(outStr, file->d_name);
@@ -270,17 +274,18 @@ void OpenDirectory(char* outStr)
 		cursorPosition[1] = 2;
 		Reprint();
 	}
+
 	closedir(directory);
 }
 
-void Reprint()
+void Reprint()		// smaze obrazovku a vypise ji znova
 {
-	system("cls");
-	PrintTop();
+	system("cls");	// vymaze konzoli
+	PrintTop();		
 	PrintDirectory();
 }
 
-void GetFileName(char* outStr)
+void GetFileName(char* outStr)			// ziska jmeno souboru na kterem je kurzor
 {
 	DIR* directory;
 	struct dirent* file;
@@ -308,7 +313,7 @@ void GetFileName(char* outStr)
 	closedir(directory);
 }
 
-void GetFilePath(char* outStr, char* fileName)
+void GetFilePath(char* outStr, char* fileName)		// spoji cestu k souboru a soubor
 {
 	if (cursorPosition[0] == 0)
 	{
@@ -324,7 +329,7 @@ void GetFilePath(char* outStr, char* fileName)
 	}
 }
 
-void FileCopy()
+void FileCopy()		// kopiruje soubor z okna do druheho okna
 {
 	char fileName[256];
 	GetFileName(fileName);

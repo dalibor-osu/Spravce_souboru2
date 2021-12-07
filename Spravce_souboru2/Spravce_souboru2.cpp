@@ -9,8 +9,9 @@ int cursorPosition[2];
 int main()
 {
 	// pocatecni zapsani do globalnich promennych
-	getcwd(directory1, 256);
+	getcwd(directory1, 256);		// zapise cestu programu do directory1 a directory2
 	getcwd(directory2, 256);
+
 	cursorPosition[0] = 0;			// okno kurzoru
 	cursorPosition[1] = 2;			// radek kurzoru
 	int end = 0;
@@ -22,11 +23,11 @@ int main()
 	while (end != 1)
 	{
 		//printf("%d", getch());
-		input = getch();
+		input = getch();				// podobne jako scanf, vraci cele cislo odpovidajici klavese
 
 		switch (input)
 		{
-		case 8:
+		case 8:		// backspace
 			if (cursorPosition[0] == 0)
 			{
 				GoBack(directory1);
@@ -41,8 +42,8 @@ int main()
 			Reprint();
 
 			break;
-
-		case 13:
+				
+		case 13:		// enter
 			if (cursorPosition[0] == 0)
 			{
 				OpenDirectory(directory1);
@@ -72,7 +73,6 @@ int main()
 			break;
 
 		case 77:    // key right
-
 			if (cursorPosition[0] < 1)
 			{
 				cursorPosition[0]++;
@@ -81,7 +81,6 @@ int main()
 			break;
 
 		case 75:    // key left
-
 			if (cursorPosition[0] > 0)
 			{
 				cursorPosition[0]--;
@@ -89,14 +88,15 @@ int main()
 			}
 			break;
 
-		case 99:
+		case 99:		// key c
 			FileCopy();
 			Reprint();
 			break;
 
-		case 107:
+		case 107:		// key k
 			end = 1;
 			break;
+
 		default:
 			break;
 		}
