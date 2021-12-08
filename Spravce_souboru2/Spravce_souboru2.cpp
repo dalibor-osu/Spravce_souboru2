@@ -5,6 +5,7 @@ using namespace std;
 char directory1[256];
 char directory2[256];
 int cursorPosition[2];
+int directoryPrintOffset[2];
 
 int main()
 {
@@ -14,11 +15,16 @@ int main()
 
 	cursorPosition[0] = 0;			// okno kurzoru
 	cursorPosition[1] = 2;			// radek kurzoru
+
+	directoryPrintOffset[0] = 0;
+	directoryPrintOffset[1] = 0;
+
 	int end = 0;
 	int input;
 
 	PrintTop();
 	PrintDirectory();
+	PrintBottom();
 
 	while (end != 1)
 	{
@@ -61,18 +67,43 @@ int main()
 			break;
 
 		case 72:    // klavesa up
-			if (cursorPosition[1] > 2)
+
+			if (directoryPrintOffset[cursorPosition[0]] == 0)
+			{
+				if (cursorPosition[1] > 2)
+				{
+					cursorPosition[1]--;
+					Reprint();
+				}
+			}
+			else
 			{
 				cursorPosition[1]--;
-				Reprint();
+
+				if (cursorPosition[1] < 2)
+				{
+					cursorPosition[1] = 2;
+					directoryPrintOffset[cursorPosition[0]]--;
+					Reprint();
+				}
+				else
+				{
+					Reprint();
+				}
 			}
 
 			break;
 
 		case 80:    // klavesa down
-			if (cursorPosition[1] < directoryFileCount[cursorPosition[0]] - 1)
+			if (cursorPosition[1] + directoryPrintOffset[cursorPosition[0]] < directoryFileCount[cursorPosition[0]] - 1)
 			{
 				cursorPosition[1]++;
+
+				if (cursorPosition[1] > 38)
+				{
+					cursorPosition[1] = 38;
+					directoryPrintOffset[cursorPosition[0]]++;
+				}
 				Reprint();
 			}
 
@@ -82,6 +113,7 @@ int main()
 			if (cursorPosition[0] < 1)
 			{
 				cursorPosition[0]++;
+				cursorPosition[1] = 2;
 				Reprint();
 			}
 			break;
@@ -89,6 +121,7 @@ int main()
 		case 75:    // klavesa left
 			if (cursorPosition[0] > 0)
 			{
+				cursorPosition[1] = 2;
 				cursorPosition[0]--;
 				Reprint();
 			}
@@ -101,6 +134,7 @@ int main()
 
 		case 100:		// klacesa d
 			FileDelete();
+			Reprint();
 			break;
 
 		case 107:		// klavesa k

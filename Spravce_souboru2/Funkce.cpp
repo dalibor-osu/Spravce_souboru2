@@ -1,4 +1,4 @@
-#include "Spravce_souboru2.h"
+﻿#include "Spravce_souboru2.h"
 
 using namespace std;
 
@@ -20,15 +20,30 @@ void GetFilePath(char directory[], char fileName[], char* outStr)	// zapise cest
 
 }
 
-void FileSize(char path[], char* outStr)					// zapise velikost souboru do outStr
+void FileSize(char path[], char* outStrSize, char* outStrModified)					// zapise velikost souboru do outStr
 	{
+	const char* fileSize = 0;
+	char modified[10];
 	string s(path);								// deklarace stringu s (naplni se path)
 	struct stat stat_buf;						// struktura z knihovny stat.h
 	int rc = stat(s.c_str(), &stat_buf);		// ziska vlastnosti souboru
+
 	float sizef = stat_buf.st_size;				// ziska velikost souboru v bajtech
-	string size = to_string(sizef / 1000);		// prekonvertuje cislo na text + vydeli cislo 1000 (kb)
-	const char* fileSize = size.c_str();		// udela ze stringu size pole fileSize
-	memcpy(outStr, fileSize, 256);				
+	string size = to_string(sizef / 1024);		// prekonvertuje cislo na text + vydeli cislo 1000 (kb)
+
+	strftime(modified, 10, "%d.%m.%y", localtime(&stat_buf.st_mtime));
+
+
+	if (sizef == 0 || (int)sizef % 4096 == 0)
+	{
+		fileSize = " ";
+	}
+	else
+	{
+		fileSize = size.c_str();					// udela ze stringu size pole fileSize
+	}
+	memcpy(outStrSize, fileSize, 256);
+	memcpy(outStrModified, modified, 10);
 }
 
 void ClearPrintArray()							// vymaze obsah directoryPrint
@@ -52,30 +67,54 @@ void PrintDirectory()	// tiskne obsah slozek
 	int radek = 0;						
 	char filePath[256];
 	char fileSize[256];
+	char fileLastModified[10];
 
 	if (dir1 != NULL)		// kontroluje slozku 1
 	{
 		while ((file = readdir(dir1)) != NULL)
-		{
-			memcpy(directoryPrint[radek], file->d_name, strlen(file->d_name) + 1);	
-			GetFilePath(directory1, file->d_name, filePath);
-			FileSize(filePath, fileSize);
-
-			for (int i = strlen(file->d_name); i <= 60; i++)
+		{	
+			if (radek < 39 + directoryPrintOffset[0] && radek >= directoryPrintOffset[0])
 			{
-				directoryPrint[radek][i] = ' ';
+				if (strlen(file->d_name) <= 50)
+				{
+					memcpy(directoryPrint[radek - directoryPrintOffset[0]], file->d_name, strlen(file->d_name) + 1);
+				}
+				else
+				{
+					memcpy(directoryPrint[radek - directoryPrintOffset[0]], file->d_name, 50);
+				}
+
+				GetFilePath(directory1, file->d_name, filePath);
+				FileSize(filePath, fileSize, fileLastModified);
+
+				for (int i = strlen(directoryPrint[radek - directoryPrintOffset[0]]); i <= 60; i++)
+				{
+					directoryPrint[radek - directoryPrintOffset[0]][i] = ' ';
+				}
+
+				strcat(directoryPrint[radek - directoryPrintOffset[0]], fileSize);
+
+				for (int i = 60 + strlen(fileSize); i <= 90; i++)
+				{
+					directoryPrint[radek - directoryPrintOffset[0]][i] = ' ';
+				}
+
+				strcat(directoryPrint[radek - directoryPrintOffset[0]], fileLastModified);
+
+				for (int i = strlen(directoryPrint[radek - directoryPrintOffset[0]]); i <= 100; i++)
+				{
+					directoryPrint[radek - directoryPrintOffset[0]][i] = ' ';
+				}
+
+				directoryPrint[radek - directoryPrintOffset[0]][100] = '|';
+				directoryPrint[radek - directoryPrintOffset[0]][101] = '\0';
 			}
 
-			strcat(directoryPrint[radek], fileSize);
+			if(radek - directoryPrintOffset[0] == 39)
+			{
+				memcpy(directoryPrint[39], "...", 3);
+			}
 			
-			for (int i = 60 + strlen(fileSize); i <= 100; i++)
-			{
-				directoryPrint[radek][i] = ' ';
-			}
-
-
-			directoryPrint[radek][100] = '|';
-			directoryPrint[radek][101] = '\0';
 			radek++;
 		}
 	}
@@ -91,35 +130,63 @@ void PrintDirectory()	// tiskne obsah slozek
 	{
 		while ((file = readdir(dir2)) != NULL)
 		{
-			if (radek >= directoryFileCount[0])
+			if (radek < 39 + directoryPrintOffset[1] && radek >= directoryPrintOffset[1])
 			{
-				for (int i = 0; i <= 100; i++)
+				if (radek - directoryPrintOffset[1] >= directoryFileCount[0])
 				{
-					directoryPrint[radek][i] = ' ';
+					for (int i = 0; i <= 100; i++)
+					{
+						directoryPrint[radek - directoryPrintOffset[1]][i] = ' ';
+					}
+
+					directoryPrint[radek - directoryPrintOffset[1]][100] = '|';
+					directoryPrint[radek - directoryPrintOffset[1]][101] = '\0';
 				}
 
-				directoryPrint[radek][100] = '|';
-				directoryPrint[radek][101] = '\0';
+				if (strlen(file->d_name) >= 50)
+				{
+					strncat(directoryPrint[radek - directoryPrintOffset[1]], file->d_name, 50);
+				}
+				else
+				{
+					strncat(directoryPrint[radek - directoryPrintOffset[1]], file->d_name, strlen(file->d_name));		// pripise na konec textu file->d_name, konec pozna podle \0
+				}
+				
+				GetFilePath(directory2, file->d_name, filePath);
+				FileSize(filePath, fileSize, fileLastModified);
+
+				for (int i = strlen(directoryPrint[radek - directoryPrintOffset[1]]); i <= 160; i++)
+				{
+					directoryPrint[radek - directoryPrintOffset[1]][i] = ' ';
+				}
+
+				strcat(directoryPrint[radek - directoryPrintOffset[1]], fileSize);
+
+				for (int i = strlen(fileSize) + 160; i < 200; i++)
+				{
+					directoryPrint[radek - directoryPrintOffset[1]][i] = ' ';
+				}
+
+				directoryPrint[radek - directoryPrintOffset[1]][199] = '\0';
 			}
 
-			strncat(directoryPrint[radek], file->d_name, strlen(file->d_name));		// pripise na konec textu file->d_name, konec pozna podle \0
-
-			GetFilePath(directory2, file->d_name, filePath);
-			FileSize(filePath, fileSize);
-
-			for (int i = strlen(file->d_name) + 101; i <= 160; i++)
+			if (radek - directoryPrintOffset[1] == 39)
 			{
-				directoryPrint[radek][i] = ' ';
+				for (int i = strlen(directoryPrint[39]); i < 104; i++)
+				{
+					if (i < 101)
+					{
+						directoryPrint[39][i] = ' ';
+					}
+					else
+					{
+						directoryPrint[39][i] = '.';
+					}
+				}
+
+
 			}
 
-			strcat(directoryPrint[radek], fileSize);
-
-			for (int i = strlen(fileSize) + 160; i < 200; i++)
-			{
-				directoryPrint[radek][i] = ' ';
-			}
-
-			directoryPrint[radek][199] = '\0';
 			radek++;
 		}
 	}
@@ -261,7 +328,7 @@ void OpenDirectory(char* outStr)		// otevre slozku na ktere je kruzor
 	DIR* directory = opendir(outStr);
 	struct dirent* file;
 
-	for (int i = 0; i <= cursorPosition[1]; i++)
+	for (int i = 0; i <= cursorPosition[1] + directoryPrintOffset[cursorPosition[0]]; i++)
 	{
 		file = readdir(directory);
 	}
@@ -272,10 +339,17 @@ void OpenDirectory(char* outStr)		// otevre slozku na ktere je kruzor
 		strcat(outStr, file->d_name);
 
 		cursorPosition[1] = 2;
+		directoryPrintOffset[cursorPosition[0]] = 0;
 		Reprint();
 	}
 
 	closedir(directory);
+}
+
+void PrintBottom()
+{
+	cout << endl;
+	cout << "[Pohyb: sipky]     [Smazat: \"D\"]     [Kopirovat: \"C\"]     [Presunout: \"M\"]     [Prejmenovat: \"R\"]     [Vytvorit: \"+\"]     [Konec: \"K\"]" << endl;
 }
 
 void Reprint()		// smaze obrazovku a vypise ji znova
@@ -283,6 +357,7 @@ void Reprint()		// smaze obrazovku a vypise ji znova
 	system("cls");	// vymaze konzoli
 	PrintTop();		
 	PrintDirectory();
+	PrintBottom();
 }
 
 void GetFileName(char* outStr)			// ziska jmeno souboru na kterem je kurzor
@@ -294,7 +369,7 @@ void GetFileName(char* outStr)			// ziska jmeno souboru na kterem je kurzor
 	{
 		directory = opendir(directory1);
 		
-		for (int i = 0; i <= cursorPosition[1]; i++)
+		for (int i = 0; i <= cursorPosition[1] + directoryPrintOffset[cursorPosition[0]]; i++)
 		{
 			file = readdir(directory);
 		}
@@ -303,12 +378,11 @@ void GetFileName(char* outStr)			// ziska jmeno souboru na kterem je kurzor
 	{
 		directory = opendir(directory2);
 
-		for (int i = 0; i <= cursorPosition[1]; i++)
+		for (int i = 0; i <= cursorPosition[1] + directoryPrintOffset[cursorPosition[0]]; i++)
 		{
 			file = readdir(directory);
 		}
 	}
-
 	memcpy(outStr, file->d_name, strlen(file->d_name) + 1);
 	closedir(directory);
 }
@@ -405,7 +479,7 @@ void FileCreate()		// vytvori soubor
 	CreateFile(newFilePath, GENERIC_ALL, FILE_SHARE_DELETE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
 }
 
-void FileRename()
+void FileRename()		// prejmenuje soubor
 {
 	char fileName[256];
 	GetFileName(fileName);
@@ -435,7 +509,7 @@ void FileRename()
 	rename(filePath, newFilePath);
 }
 
-void FileDelete()
+void FileDelete()		// smaze soubor
 {
 	char fileName[256];
 	GetFileName(fileName);
@@ -443,7 +517,33 @@ void FileDelete()
 	char filePath[256];
 	GetFilePath(filePath, fileName);
 
-	cout << filePath;
+	int potvrzeni;
+
+	cout << "Opravdu chtete smazat soubor: ";
+
+	SetConsoleTextAttribute(hConsole, 12);
+	cout << fileName;
+
+	SetConsoleTextAttribute(hConsole, 15);
+	cout << "? [y/n]: ";
+
+	while (true)		// opakuje se dokud uzivatel nestiskne klavesu n nebo y
+	{
+		potvrzeni = getch();
+
+		if (potvrzeni == 121 || potvrzeni == 89)
+		{
+			DeleteFile(filePath);
+			break;
+		}
+
+		if (potvrzeni == 110 || potvrzeni == 78)
+		{
+			break;
+		}
+		
+	}
+	
 }
 
 

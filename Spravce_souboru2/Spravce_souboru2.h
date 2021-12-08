@@ -9,11 +9,13 @@
 #include <fileapi.h>	// prace se soubory
 #include <sys/stat.h>	// vlastnosti souboru
 #include <string>		// lepsi prace s textem
+#include <time.h>
 
 // globalni promenne
 extern char directory1[256];			// cesta ke slozce 1
 extern char directory2[256];			// cesta ke slozce 2
 extern char directoryPrint[40][200];	// pole k tisku
+extern int directoryPrintOffset[2];
 extern int directoryFileCount[2];		// pocet souboru ve slozkach
 extern int cursorPosition[2];			// souradnice kurzoru
 
@@ -28,3 +30,4 @@ void FileMove();
 void FileCreate();
 void FileRename();
 void FileDelete();
+void PrintBottom();
