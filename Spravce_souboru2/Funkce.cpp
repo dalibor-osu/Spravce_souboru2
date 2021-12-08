@@ -162,7 +162,14 @@ void PrintDirectory()	// tiskne obsah slozek
 
 				strcat(directoryPrint[radek - directoryPrintOffset[1]], fileSize);
 
-				for (int i = strlen(fileSize) + 160; i < 200; i++)
+				for (int i = strlen(directoryPrint[radek - directoryPrintOffset[1]]); i < 190; i++)
+				{
+					directoryPrint[radek - directoryPrintOffset[1]][i] = ' ';
+				}
+
+				strcat(directoryPrint[radek - directoryPrintOffset[1]], fileLastModified);
+
+				for (int i = strlen(directoryPrint[radek - directoryPrintOffset[1]]); i < 199; i++)
 				{
 					directoryPrint[radek - directoryPrintOffset[1]][i] = ' ';
 				}
@@ -304,6 +311,11 @@ void PrintTop()		// vypise hlavicku
 	}
 
 	cout << endl;
+
+	SetConsoleTextAttribute(hConsole, 9);
+
+	cout << "[Soubor]                                                    [Velikost(kb)]                [Upraveno]|[Soubor]                                                   [Velikost(kb)]               [Upraveno]" << endl;
+	SetConsoleTextAttribute(hConsole, 15);
 }
 
 void GoBack(char *outStr)		// vrati se o slozku zpet
@@ -349,7 +361,7 @@ void OpenDirectory(char* outStr)		// otevre slozku na ktere je kruzor
 void PrintBottom()
 {
 	cout << endl;
-	cout << "[Pohyb: sipky]     [Smazat: \"D\"]     [Kopirovat: \"C\"]     [Presunout: \"M\"]     [Prejmenovat: \"R\"]     [Vytvorit: \"+\"]     [Konec: \"K\"]" << endl;
+	cout << "[Pohyb: sipky]     [Jit o slozku zpet: \"Backspace\"]     [Otevrit slozku: \"Enter\"]     [Smazat: \"D\"]     [Kopirovat: \"C\"]     [Presunout: \"M\"]     [Prejmenovat: \"R\"]     [Vytvorit: \"+\"]     [Konec: \"K\"]" << endl;
 }
 
 void Reprint()		// smaze obrazovku a vypise ji znova
