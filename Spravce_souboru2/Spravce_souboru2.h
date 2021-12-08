@@ -24,3 +24,7 @@ void GoBack(char* outStr);
 void OpenDirectory(char* outStr);
 void Reprint();
 void FileCopy();
+void FileMove();
+void FileCreate();
+void FileRename();
+void FileDelete();

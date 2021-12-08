@@ -219,7 +219,7 @@ void PrintTop()		// vypise hlavicku
 
 		for (int i = strlen(directory2) - 80; i <= strlen(directory2); i++)
 		{
-			top[j] = directory1[i];
+			top[j] = directory2[i];
 			j++;
 		}
 		top[j] = '\0';
@@ -353,8 +353,97 @@ void FileCopy()		// kopiruje soubor z okna do druheho okna
 	}
 
 	CopyFile(filePath, newFilePath, 1);
-
 }
 
+void FileMove()		// presune soubor z okna do druheho okna
+{
+	char fileName[256];
+	GetFileName(fileName);
+
+	char filePath[256];
+	GetFilePath(filePath, fileName);
+
+	char newFilePath[256];
+
+	if (cursorPosition[0] == 0)
+	{
+		memcpy(newFilePath, directory2, strlen(directory2) + 1);
+		strcat(newFilePath, "\\");
+		strcat(newFilePath, fileName);
+	}
+	else
+	{
+		memcpy(newFilePath, directory1, strlen(directory1) + 1);
+		strcat(newFilePath, "\\");
+		strcat(newFilePath, fileName);
+	}
+	
+	MoveFile(filePath, newFilePath);
+}
+
+void FileCreate()		// vytvori soubor
+{
+	char fileName[256];
+	cout << "Zadejte nazev souboru i s koncovkou (napr: soubor.txt):\t";
+	cin >> fileName;
+
+	char newFilePath[256];
+
+	if (cursorPosition[0] == 0)
+	{
+		memcpy(newFilePath, directory1, strlen(directory1) + 1);
+		strcat(newFilePath, "\\");
+		strcat(newFilePath, fileName);
+	}
+	else
+	{
+		memcpy(newFilePath, directory2, strlen(directory2) + 1);
+		strcat(newFilePath, "\\");
+		strcat(newFilePath, fileName);
+	}
+	
+	CreateFile(newFilePath, GENERIC_ALL, FILE_SHARE_DELETE, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+}
+
+void FileRename()
+{
+	char fileName[256];
+	GetFileName(fileName);
+
+	char filePath[256];
+	GetFilePath(filePath, fileName);
+
+	char newFileName[256];
+	char newFilePath[256];
+
+	cout << "Zadejte novy nazev souboru\t";
+	cin >> newFileName;
+
+	if (cursorPosition[0] == 0)
+	{
+		memcpy(newFilePath, directory1, strlen(directory1) + 1);
+		strcat(newFilePath, "\\");
+		strcat(newFilePath, newFileName);
+	}
+	else
+	{
+		memcpy(newFilePath, directory2, strlen(directory2) + 1);
+		strcat(newFilePath, "\\");
+		strcat(newFilePath, newFileName);
+	}
+
+	rename(filePath, newFilePath);
+}
+
+void FileDelete()
+{
+	char fileName[256];
+	GetFileName(fileName);
+
+	char filePath[256];
+	GetFilePath(filePath, fileName);
+
+	cout << filePath;
+}
 
 

@@ -27,7 +27,7 @@ int main()
 
 		switch (input)
 		{
-		case 8:		// backspace
+		case 8:		// klavesa backspace
 			if (cursorPosition[0] == 0)
 			{
 				GoBack(directory1);
@@ -43,7 +43,7 @@ int main()
 
 			break;
 				
-		case 13:		// enter
+		case 13:		// klavesa enter
 			if (cursorPosition[0] == 0)
 			{
 				OpenDirectory(directory1);
@@ -54,7 +54,13 @@ int main()
 			}
 
 			break;
-		case 72:    // key up
+
+		case 43:		// klavesa +
+			FileCreate();
+			Reprint();
+			break;
+
+		case 72:    // klavesa up
 			if (cursorPosition[1] > 2)
 			{
 				cursorPosition[1]--;
@@ -63,7 +69,7 @@ int main()
 
 			break;
 
-		case 80:    // key down
+		case 80:    // klavesa down
 			if (cursorPosition[1] < directoryFileCount[cursorPosition[0]] - 1)
 			{
 				cursorPosition[1]++;
@@ -72,7 +78,7 @@ int main()
 
 			break;
 
-		case 77:    // key right
+		case 77:    // klavesa right
 			if (cursorPosition[0] < 1)
 			{
 				cursorPosition[0]++;
@@ -80,7 +86,7 @@ int main()
 			}
 			break;
 
-		case 75:    // key left
+		case 75:    // klavesa left
 			if (cursorPosition[0] > 0)
 			{
 				cursorPosition[0]--;
@@ -88,13 +94,28 @@ int main()
 			}
 			break;
 
-		case 99:		// key c
+		case 99:		// klavesa c
 			FileCopy();
 			Reprint();
 			break;
 
-		case 107:		// key k
+		case 100:		// klacesa d
+			FileDelete();
+			break;
+
+		case 107:		// klavesa k
 			end = 1;
+			break;
+
+		case 109:		// klavesa m
+			FileMove();
+			Reprint();
+
+			break;
+
+		case 114:		// klavesa r
+			FileRename();
+			Reprint();
 			break;
 
 		default:
