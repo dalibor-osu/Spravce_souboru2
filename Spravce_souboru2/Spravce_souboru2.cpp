@@ -6,6 +6,7 @@ char directory1[256];
 char directory2[256];
 int cursorPosition[2];
 int directoryPrintOffset[2];
+int selectedFiles[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 int main()
 {
@@ -16,11 +17,12 @@ int main()
 	cursorPosition[0] = 0;			// okno kurzoru
 	cursorPosition[1] = 2;			// radek kurzoru
 
-	directoryPrintOffset[0] = 0;
-	directoryPrintOffset[1] = 0;
+	directoryPrintOffset[0] = 0;	// offset pro okno 0
+	directoryPrintOffset[1] = 0;	// offset pro okno 1
 
 	int end = 0;
 	int input;
+	int skip;
 
 	PrintTop();
 	PrintDirectory();
@@ -28,8 +30,8 @@ int main()
 
 	while (end != 1)
 	{
-		//printf("%d", getch());
 		input = getch();				// podobne jako scanf, vraci cele cislo odpovidajici klavese
+		//printf("%d", input);
 
 		switch (input)
 		{
@@ -45,6 +47,7 @@ int main()
 			}
 
 			cursorPosition[1] = 2;
+			std::fill_n(selectedFiles, 10, 0);
 			Reprint();
 
 			break;
@@ -52,10 +55,12 @@ int main()
 		case 13:		// klavesa enter
 			if (cursorPosition[0] == 0)
 			{
+				std::fill_n(selectedFiles, 10, 0);
 				OpenDirectory(directory1);
 			}
 			else
 			{
+				std::fill_n(selectedFiles, 10, 0);
 				OpenDirectory(directory2);
 			}
 
@@ -63,6 +68,7 @@ int main()
 
 		case 43:		// klavesa +
 			FileCreate();
+			std::fill_n(selectedFiles, 10, 0);
 			Reprint();
 			break;
 
@@ -114,6 +120,7 @@ int main()
 			{
 				cursorPosition[0]++;
 				cursorPosition[1] = 2;
+				std::fill_n(selectedFiles, 10, 0);
 				Reprint();
 			}
 			break;
@@ -123,18 +130,53 @@ int main()
 			{
 				cursorPosition[1] = 2;
 				cursorPosition[0]--;
+				std::fill_n(selectedFiles, 10, 0);
 				Reprint();
 			}
 			break;
 
 		case 99:		// klavesa c
-			FileCopy();
-			Reprint();
+			if (selectedFiles[0] == 0)
+			{
+				FileCopy();
+				Reprint();
+			}
+			else
+			{
+				int i = 0;
+				while (selectedFiles[i] != 0)
+				{
+					cursorPosition[1] = selectedFiles[i];
+					FileCopy();
+					i++;
+					cursorPosition[1] = 2;
+				}
+				std::fill_n(selectedFiles, 10, 0);
+				Reprint();
+			}
 			break;
 
 		case 100:		// klacesa d
-			FileDelete();
-			Reprint();
+			skip = 0;
+			if (selectedFiles[0] == 0)
+			{
+				FileDelete(&skip);
+				Reprint();
+			}
+			else
+			{
+				int i = 0;
+				while (selectedFiles[i] != 0)
+				{
+					cursorPosition[1] = selectedFiles[i] - i + skip;
+					FileDelete(&skip);
+					i++;
+					cursorPosition[1] = 2;
+					Reprint();
+				}
+				std::fill_n(selectedFiles, 10, 0);
+				Reprint();
+			}
 			break;
 
 		case 107:		// klavesa k
@@ -142,16 +184,42 @@ int main()
 			break;
 
 		case 109:		// klavesa m
-			FileMove();
-			Reprint();
+			if (selectedFiles[0] == 0)
+			{
+				FileMove();
+				Reprint();
+			}
+			else
+			{
+				int i = 0;
+				while (selectedFiles[i] != 0)
+				{
+					cursorPosition[1] = selectedFiles[i] - i;
+					FileMove();
+					i++;
+					cursorPosition[1] = 2;
+				}
+				std::fill_n(selectedFiles, 10, 0);
+				Reprint();
+			}
+
 
 			break;
 
 		case 114:		// klavesa r
 			FileRename();
+			std::fill_n(selectedFiles, 10, 0);
 			Reprint();
 			break;
 
+		case 115:		// klavesa s
+			if (SelectAnother() == 1)
+			{
+				SortSelectedFiles();
+				Reprint();
+			}
+
+			break;
 		default:
 			break;
 		}

@@ -54,6 +54,21 @@ void ClearPrintArray()							// vymaze obsah directoryPrint
 	}
 }
 
+int IsSelected(int row)
+{
+	int selected = 0;
+
+	for (int i = 0; i < 10; i++)
+	{
+		if (row == selectedFiles[i])
+		{
+			selected = 1;
+		}
+	}
+	
+	return selected;
+}
+
 void PrintDirectory()	// tiskne obsah slozek
 {
 	ClearPrintArray();
@@ -203,7 +218,7 @@ void PrintDirectory()	// tiskne obsah slozek
 
 	for  (int i = 2; i < 40; i++)		// vypisuje soubory od radku 2
 	{
-		if (cursorPosition[1] == i)		// kontroluje, jestli radek kurzoru odpovida radku tisku
+		if (cursorPosition[1] == i || IsSelected(i))		// kontroluje, jestli radek kurzoru odpovida radku tisku
 		{
 			if (cursorPosition[0] == 0)		// kontroluje okno kurzoru
 			{
@@ -361,7 +376,7 @@ void OpenDirectory(char* outStr)		// otevre slozku na ktere je kruzor
 void PrintBottom()
 {
 	cout << endl;
-	cout << "[Pohyb: sipky]     [Jit o slozku zpet: \"Backspace\"]     [Otevrit slozku: \"Enter\"]     [Smazat: \"D\"]     [Kopirovat: \"C\"]     [Presunout: \"M\"]     [Prejmenovat: \"R\"]     [Vytvorit: \"+\"]     [Konec: \"K\"]" << endl;
+	cout << "[Pohyb: sipky]     [Zpet: \"Backspace\"]     [Otevrit slozku: \"Enter\"]     [Smazat: \"D\"]     [Kopirovat: \"C\"]     [Presunout: \"M\"]     [Prejmenovat: \"R\"]     [Vytvorit: \"+\"]     [Konec: \"K\"]     [Vybrat: \"S\"]" << endl;
 }
 
 void Reprint()		// smaze obrazovku a vypise ji znova
@@ -521,7 +536,20 @@ void FileRename()		// prejmenuje soubor
 	rename(filePath, newFilePath);
 }
 
-void FileDelete()		// smaze soubor
+int NumberOfSelectedFiles()
+{
+	int i = 0;
+	int number = 0;
+	while (selectedFiles[i] != 0)
+	{
+		number++;
+		i++;
+	}
+
+	return number;
+}
+
+void FileDelete(int* skip)		// smaze soubor
 {
 	char fileName[256];
 	GetFileName(fileName);
@@ -551,11 +579,52 @@ void FileDelete()		// smaze soubor
 
 		if (potvrzeni == 110 || potvrzeni == 78)
 		{
+			*skip = *skip + 1;
 			break;
 		}
 		
 	}
 	
+}
+
+int SelectAnother()		// vybere dalsi soubor
+{
+	int position = 0;
+	int write = 0;
+	while (write == 0)
+	{
+		if (IsSelected(cursorPosition[1]))
+		{
+			return 0;
+		}
+
+		if (selectedFiles[position] == 0)
+		{
+			selectedFiles[position] = cursorPosition[1];
+			write = 1;
+		}
+		else
+		{
+			position++;
+		}
+
+		if (position > 9)
+		{
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+int cmpfunc(const void* a, const void* b)		// funkce pro porovnani cisel
+{
+	return (*(int*)a - *(int*)b);
+}
+
+void SortSelectedFiles()		// seradi cisla v poli selectedFiles
+{
+	std::qsort(selectedFiles, NumberOfSelectedFiles(), sizeof(int), cmpfunc);
 }
 
 
